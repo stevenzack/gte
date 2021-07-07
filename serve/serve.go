@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/StevenZack/gte/util"
 	"github.com/StevenZack/mux"
@@ -21,8 +22,12 @@ var (
 )
 
 func ApiCommand(c *cli.Context) error {
-	server = mux.NewServer("localhost:" + strconv.Itoa(c.Int("p")))
-	dir = c.String("dir")
+	return serve(c.String("dir"), c.Int("p"))
+}
+
+func serve(d string, port int) error {
+	server = mux.NewServer("localhost:" + strconv.Itoa(port))
+	dir = d
 
 	//validate
 	info, e := os.Stat(dir)
@@ -40,13 +45,14 @@ func ApiCommand(c *cli.Context) error {
 	openurl.Open("http://" + server.HTTPServer.Addr)
 	e = server.ListenAndServe()
 	if e != nil {
+		if strings.Contains(e.Error(), "bind:") {
+			return serve(d, port+1)
+		}
 		log.Println(e)
 		return e
 	}
-
 	return nil
 }
-
 func handler(w http.ResponseWriter, r *http.Request) {
 	uri := r.URL.Path
 	if uri == "/" {
@@ -70,7 +76,13 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, e.Error(), http.StatusInternalServerError)
 		return
 	}
-	e = t.Execute(w, uri)
+
+	if t == nil {
+		server.NotFound(w, r)
+		return
+	}
+
+	e = t.ExecuteTemplate(w, uri, nil)
 	if e != nil {
 		log.Println(e)
 		http.Error(w, e.Error(), http.StatusInternalServerError)

@@ -15,16 +15,24 @@ func ParseTemplates(dir string) (*template.Template, error) {
 	if e != nil {
 		return nil, e
 	}
+	abs = filepath.ToSlash(abs)
 
-	var t *template.Template
+	var root *template.Template
 	e = filepath.Walk(dir, func(path string, info fs.FileInfo, err error) error {
+		path = filepath.ToSlash(path)
+
 		switch filepath.Ext(info.Name()) {
 		case ".html":
 			relativeUri := strToolkit.TrimStart(path, abs) // like /index.html
-			if t == nil {
-				t = template.New(relativeUri)
+			if root == nil {
+				root = template.New(relativeUri)
+			}
+
+			var t *template.Template
+			if relativeUri == root.Name() {
+				t = root
 			} else {
-				t = t.New(relativeUri)
+				t = root.New(relativeUri)
 			}
 
 			//read
@@ -38,7 +46,7 @@ func ParseTemplates(dir string) (*template.Template, error) {
 				return e
 			}
 
-			t, e = t.Parse(string(b))
+			_, e = t.Parse(string(b))
 			if e != nil {
 				return e
 			}
@@ -50,5 +58,5 @@ func ParseTemplates(dir string) (*template.Template, error) {
 		return nil, e
 	}
 
-	return t, nil
+	return root, nil
 }
