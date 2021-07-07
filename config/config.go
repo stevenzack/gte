@@ -34,7 +34,7 @@ func LoadConfig(root string, port int) (Config, error) {
 		Port: port,
 		Root: root,
 		InternalBlackList: []string{
-			CONFIG_FILE_NAME,
+			"/" + CONFIG_FILE_NAME,
 		},
 		ApiServer: "http://localhost",
 	}
