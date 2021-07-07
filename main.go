@@ -18,6 +18,12 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "Golang Template Engine"
 	app.Version = "1.0.0"
+	wd, e := os.Getwd()
+	if e != nil {
+		log.Println(e)
+		return
+	}
+
 	app.Commands = []cli.Command{
 		{
 			Name:  "serve",
@@ -26,10 +32,12 @@ func main() {
 				cli.IntFlag{
 					Name:  "p",
 					Usage: "specific server port",
+					Value: 8080,
 				},
 				cli.StringFlag{
 					Name:  "dir",
 					Usage: "Project root location",
+					Value: wd,
 				},
 			},
 			Action: serve.ApiCommand,
@@ -41,6 +49,7 @@ func main() {
 				cli.StringFlag{
 					Name:  "dir",
 					Usage: "Project root location",
+					Value: wd,
 				},
 			},
 			Action: build.ApiCommand,
@@ -52,17 +61,19 @@ func main() {
 				cli.IntFlag{
 					Name:  "p",
 					Usage: "specific server port",
+					Value: 8080,
 				},
 				cli.StringFlag{
 					Name:  "dir",
 					Usage: "Project root location",
+					Value: wd,
 				},
 			},
 			Action: run.ApiCommand,
 		},
 	}
 
-	e := app.Run(os.Args)
+	e = app.Run(os.Args)
 	if e != nil {
 		log.Println(e)
 		return
