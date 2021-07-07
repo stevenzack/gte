@@ -1,4 +1,4 @@
-package util
+package server
 
 import (
 	"encoding/json"
@@ -6,10 +6,18 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
-func httpGet(url string) (string, error) {
-	res, e := http.Get(url)
+func (s *Server) handleUrl(url string) string {
+	if strings.HasPrefix(url, "http") {
+		return url
+	}
+	return s.cfg.ApiServer + url
+}
+
+func (s *Server) httpGet(url string) (string, error) {
+	res, e := http.Get(s.handleUrl(url))
 	if e != nil {
 		return "", e
 	}
@@ -26,8 +34,8 @@ func httpGet(url string) (string, error) {
 	return string(b), nil
 }
 
-func httpGetJson(url string) (map[string]interface{}, error) {
-	res, e := http.Get(url)
+func (s *Server) httpGetJson(url string) (map[string]interface{}, error) {
+	res, e := http.Get(s.handleUrl(url))
 	if e != nil {
 		return nil, e
 	}

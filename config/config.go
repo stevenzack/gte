@@ -11,11 +11,13 @@ import (
 )
 
 type Config struct {
-	Host      string   `json:"host"`
-	Port      int      `json:"port"`
-	Root      string   `json:"root"` //root directory of your project
-	Routes    []Route  `json:"routes"`
-	BlackList []string `json:"blackList"`
+	Host              string   `json:"host"`
+	Port              int      `json:"port"`
+	Root              string   `json:"root"` //root directory of your project
+	Routes            []Route  `json:"routes"`
+	BlackList         []string `json:"blackList"`
+	ApiServer         string   `json:"apiServer"`
+	InternalBlackList []string `json:"-"`
 }
 type Route struct {
 	Path string `json:"path"`
@@ -31,9 +33,10 @@ func LoadConfig(root string, port int) (Config, error) {
 		Host: "0.0.0.0",
 		Port: port,
 		Root: root,
-		BlackList: []string{
+		InternalBlackList: []string{
 			CONFIG_FILE_NAME,
 		},
+		ApiServer: "http://localhost",
 	}
 
 	b, e := ioutil.ReadFile(filepath.Join(root, CONFIG_FILE_NAME))

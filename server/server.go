@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"errors"
+	"html/template"
 	"log"
 	"net/http"
 	"path/filepath"
@@ -17,11 +18,16 @@ type Server struct {
 	HTTPServer  *http.Server
 	cfg         config.Config
 	prehandlers []func(w http.ResponseWriter, r *http.Request) bool
+	funcs       template.FuncMap
 }
 
 func NewServer(cfg config.Config) (*Server, error) {
 	s := &Server{
 		cfg: cfg,
+	}
+	s.funcs = template.FuncMap{
+		"httpGet":     s.httpGet,
+		"httpGetJson": s.httpGetJson,
 	}
 	//route duplication check
 	checked := map[string]string{}
@@ -48,7 +54,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//blacklist
-	for _, black := range s.cfg.BlackList {
+	for _, black := range append(s.cfg.BlackList, s.cfg.InternalBlackList...) {
 		if r.URL.Path == black {
 			s.NotFound(w, r)
 			return
@@ -80,7 +86,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//parse templates
-	t, e := util.ParseTemplates(s.cfg.Root)
+	t, e := util.ParseTemplates(s.cfg.Root, s.funcs)
 	if e != nil {
 		log.Println(e)
 		http.Error(w, e.Error(), http.StatusInternalServerError)

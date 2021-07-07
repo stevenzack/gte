@@ -10,7 +10,7 @@ import (
 	"github.com/StevenZack/tools/strToolkit"
 )
 
-func ParseTemplates(dir string) (*template.Template, error) {
+func ParseTemplates(dir string, funcs template.FuncMap) (*template.Template, error) {
 	abs, e := filepath.Abs(dir)
 	if e != nil {
 		return nil, e
@@ -25,7 +25,7 @@ func ParseTemplates(dir string) (*template.Template, error) {
 		case ".html":
 			relativeUri := strToolkit.TrimStart(path, abs) // like /index.html
 			if root == nil {
-				root = template.New(relativeUri)
+				root = template.New(relativeUri).Funcs(funcs)
 			}
 
 			var t *template.Template
