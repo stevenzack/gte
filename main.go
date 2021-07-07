@@ -39,6 +39,11 @@ func main() {
 					Usage: "Project root location",
 					Value: wd,
 				},
+				cli.StringFlag{
+					Name:  "c",
+					Usage: "GTE config json file location, default 'gte.config.json'",
+					Value: "gte.config.json",
+				},
 			},
 			Action: serve.ApiCommand,
 		},
@@ -67,6 +72,11 @@ func main() {
 					Name:  "dir",
 					Usage: "Project root location",
 					Value: wd,
+				},
+				cli.StringFlag{
+					Name:  "c",
+					Usage: "GTE config json file location, default 'gte.config.json'",
+					Value: "gte.config.json",
 				},
 			},
 			Action: run.ApiCommand,

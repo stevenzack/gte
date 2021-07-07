@@ -1,2 +1,2 @@
 # gte
-Golang Template Engine. Write website like "PHP"
+Golang Template Engine. Build websites like JSP
