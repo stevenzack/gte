@@ -1,6 +1,4 @@
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
-github.com/StevenZack/mux v1.2.1 h1:7PrDba7LGIpwpUh7ZqtLY+XpRignJo9Dk2w3MBauQ+s=
-github.com/StevenZack/mux v1.2.1/go.mod h1:+Bs9f+KSPsXlphd8klLY26E66NvjCyoFdd+0B3qczv4=
 github.com/StevenZack/openurl v0.0.0-20190430065139-b25363f65ff8 h1:aaBpb+Ig4NNrG4omEUvLdgeizvwTOLGek0BZuuULYYI=
 github.com/StevenZack/openurl v0.0.0-20190430065139-b25363f65ff8/go.mod h1:tGSuG3wQ/DMizcSjaESj69o1TvmVrYuI6NLlF7Dp8iI=
 github.com/StevenZack/tools v1.13.7 h1:4J3GdbglCmH8OBlQ9Rd66Ft+IFpzOSOI2d41U+AGSUk=

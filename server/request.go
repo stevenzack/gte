@@ -14,8 +14,7 @@ func NewRequest(ctx *Context, r *http.Request) *Request {
 	}
 }
 
-func (r *Request) GetPathParam(k string) string {
+func (r *Request) GetParam(k string) string {
 	m := r.ctx.route.Params(r.URL.Path)
 	return m[k]
 }
-

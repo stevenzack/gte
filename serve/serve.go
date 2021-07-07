@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 
@@ -29,6 +30,7 @@ func serve(dir string, port int) error {
 		log.Println(e)
 		return e
 	}
+	server.AddPrehandler(printRequest)
 
 	//validate
 	info, e := os.Stat(dir)
@@ -51,4 +53,9 @@ func serve(dir string, port int) error {
 		return e
 	}
 	return nil
+}
+
+func printRequest(w http.ResponseWriter, r *http.Request) bool {
+	fmt.Println(r.URL.Path)
+	return false
 }
