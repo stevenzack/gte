@@ -96,7 +96,7 @@ func build(env, out string) error {
 
 		var tail string
 		//gzip
-		if shouldGZip(ext) {
+		if util.ShouldGZip(ext) {
 			e = util.Gzip(path, dst+".gzip")
 			if e != nil {
 				log.Println(e)
@@ -105,7 +105,7 @@ func build(env, out string) error {
 			tail = "\t[gzip]"
 		}
 
-		if shouldCWebp(ext) {
+		if util.ShouldCWebp(ext) {
 			e = util.CWebp(path, dst+".webp")
 			if e != nil {
 				log.Println(e)
@@ -124,22 +124,4 @@ func build(env, out string) error {
 
 	fmt.Println("\n build finished: ", out)
 	return nil
-}
-
-func shouldGZip(ext string) bool {
-	switch ext {
-	case ".js", ".css", ".json", ".txt":
-		return true
-	default:
-		return false
-	}
-}
-
-func shouldCWebp(ext string) bool {
-	switch ext {
-	case ".jpg", ".jpeg", ".png":
-		return true
-	default:
-		return false
-	}
 }

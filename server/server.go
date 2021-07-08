@@ -2,13 +2,18 @@ package server
 
 import (
 	"bytes"
+	"compress/gzip"
 	"context"
 	"errors"
 	"html/template"
+	"io"
 	"log"
+	"mime"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/StevenZack/gte/config"
@@ -83,10 +88,28 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//serve file
-	switch filepath.Ext(route.To) {
+	ext := filepath.Ext(route.To)
+	switch ext {
 	case ".html":
 	default:
-		http.ServeFile(w, r, filepath.Join(s.cfg.Root, route.To))
+		path := filepath.Join(s.cfg.Root, route.To)
+		if util.ShouldCWebp(ext) && strings.Contains(r.Header.Get("Accept"), "webp") {
+			if _, e := os.Stat(path + ".webp"); e == nil {
+				http.ServeFile(w, r, path+".webp")
+				return
+			}
+		}
+
+		//gzip
+		if util.ShouldGZip(ext) && strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+			if _, e := os.Stat(path + ".gzip"); e == nil {
+				w.Header().Set("Content-Encoding", "gzip")
+				w.Header().Set("Content-Type", mime.TypeByExtension(ext))
+				http.ServeFile(w, r, path+".gzip")
+				return
+			}
+		}
+		http.ServeFile(w, r, path)
 		return
 	}
 
@@ -109,6 +132,22 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, e.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	//gzip
+	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+		w.Header().Set("Content-Encoding", "gzip")
+		rw := gzip.NewWriter(w)
+		rw.Name = filepath.Base(route.To)
+		defer rw.Close()
+		_, e = io.Copy(rw, out)
+		if e != nil {
+			log.Println(e)
+			http.Error(w, e.Error(), http.StatusInternalServerError)
+			return
+		}
+		return
+	}
+
 	w.Write(out.Bytes())
 }
 

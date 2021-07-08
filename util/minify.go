@@ -6,11 +6,35 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"time"
 
 	"github.com/tdewolff/minify/v2/minify"
 )
+
+func ShouldGZip(ext string) bool {
+	switch ext {
+	case ".js", ".css", ".json", ".txt":
+		return true
+	default:
+		return false
+	}
+}
+
+func ShouldCWebp(ext string) bool {
+	switch ext {
+	case ".jpg", ".jpeg", ".png":
+		return true
+	default:
+		return false
+	}
+}
+
+func CWebp(file, out string) error {
+	// return ("cwebp", "-o", out, file)
+	return exec.Command("cwebp", "-o", out, file).Run()
+}
 
 func MinifyCss(file, out string) error {
 	b, e := ioutil.ReadFile(file)
@@ -39,6 +63,7 @@ func Gzip(file, out string) error {
 	}
 	defer fi.Close()
 	writer := gzip.NewWriter(fo)
+	defer writer.Close()
 	writer.Name = filepath.Base(out)
 	writer.Comment = "Gzip file of " + writer.Name
 	writer.ModTime = time.Now()
