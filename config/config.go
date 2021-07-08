@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -10,18 +11,26 @@ import (
 
 	"github.com/StevenZack/gte/util"
 	"github.com/StevenZack/tools/strToolkit"
+	"golang.org/x/text/language"
+	"gopkg.in/yaml.v2"
 )
 
 type Config struct {
-	Host              string            `json:"host"`
-	Port              int               `json:"port"`
-	Root              string            `json:"root"` //root directory of your project
-	Routes            []Route           `json:"routes"`
-	BlackList         []string          `json:"blackList"`
-	ApiServer         string            `json:"apiServer"`
-	Envs              map[string]Config `json:"envs"` //Environments
-	Env               string            `json:"-"`
-	InternalBlackList []string          `json:"-"`
+	Host      string            `json:"host"`
+	Port      int               `json:"port"`
+	Root      string            `json:"root"` //root directory of your project
+	Routes    []Route           `json:"routes"`
+	BlackList []string          `json:"blackList"`
+	ApiServer string            `json:"apiServer"` //API server, e.g. "http://localhost:12300"
+	Envs      map[string]Config `json:"envs"`      //customized environments
+	Lang      struct {
+		Dir     string `json:"dir"`     //language resources location
+		Default string `json:"default"` //default language, e.g. 'zh-CN'
+	} `json:"lang"` //language setup
+
+	Env               string                       `json:"-"`
+	InternalBlackList []string                     `json:"-"`
+	Strs              map[string]map[string]string `json:"-"`
 }
 type Route struct {
 	Path string `json:"path"`
@@ -44,6 +53,7 @@ func LoadConfig(env, root string, port int) (Config, error) {
 		ApiServer: "http://localhost",
 	}
 
+	//gte.config.json
 	b, e := ioutil.ReadFile(filepath.Join(root, CONFIG_FILE_NAME))
 	if e != nil {
 		if os.IsNotExist(e) {
@@ -66,6 +76,58 @@ func LoadConfig(env, root string, port int) (Config, error) {
 		e := util.ReplaceFieldIND(&v, v1)
 		if e != nil {
 			return v, e
+		}
+	}
+
+	//lang file check
+	if v.Lang.Dir != "" {
+		if v.Lang.Default == "" {
+			return v, errors.New("'lang.dir' configure is set, but default language is not set. e.g. 'zh-HK'")
+		}
+		langDir := filepath.Join(root, v.Lang.Dir)
+		if _, e := os.Stat(langDir); os.IsNotExist(e) {
+			return v, errors.New("The language directory '" + langDir + "' doesn't exist")
+		}
+		v.Strs = make(map[string]map[string]string)
+		fs, e := ioutil.ReadDir(langDir)
+		if e != nil {
+			return v, e
+		}
+		for _, f := range fs {
+			if !strings.HasSuffix(f.Name(), ".yaml") {
+				continue
+			}
+			lang := strToolkit.TrimEnd(f.Name(), ".yaml")
+			_, e := language.Parse(lang)
+			if e != nil {
+				return v, errors.New("Invalid language resource name '" + f.Name() + "', e.g. 'zh-HK.yaml' .https://www.unicode.org/reports/tr35/#Unicode_Language_and_Locale_Identifiers")
+			}
+
+			//load
+			filepath := filepath.Join(langDir, f.Name())
+			b, e := ioutil.ReadFile(filepath)
+			if e != nil {
+				return v, e
+			}
+			content := string(b)
+			if strings.Contains(content, "：") {
+				content = strings.ReplaceAll(content, "：", ": ")
+				e = ioutil.WriteFile(filepath, []byte(content), 0644)
+				if e != nil {
+					return v, e
+				}
+			}
+
+			m := make(map[string]string)
+			e = yaml.UnmarshalStrict([]byte(content), &m)
+			if e != nil {
+				return v, fmt.Errorf("Reading language resource file '"+f.Name()+"' failed: %w", e)
+			}
+			v.Strs[lang] = m
+		}
+
+		if _, ok := v.Strs[v.Lang.Default]; !ok {
+			return v, errors.New("The default language resource file '" + v.Lang.Default + ".yaml' not found")
 		}
 	}
 	return v, nil

@@ -25,6 +25,7 @@ func NewServer(cfg config.Config) (*Server, error) {
 	s := &Server{
 		cfg: cfg,
 	}
+	//funcs
 	s.funcs = template.FuncMap{
 		"httpGet":     s.httpGet,
 		"httpGetJson": s.httpGetJson,
