@@ -13,3 +13,8 @@ func NewResponse(ctx *Context, w http.ResponseWriter) *Response {
 		w:   w,
 	}
 }
+
+func (r *Response) SetStatusCode(code int) error {
+	r.w.WriteHeader(code)
+	return nil
+}

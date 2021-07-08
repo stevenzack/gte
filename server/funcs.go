@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"io"
@@ -8,6 +9,12 @@ import (
 	"strconv"
 	"strings"
 )
+
+type JsonResponse struct {
+	StatusCode int
+	Data       map[string]interface{}
+	Error      string
+}
 
 func (s *Server) handleUrl(url string) string {
 	if strings.HasPrefix(url, "http") {
@@ -34,7 +41,7 @@ func (s *Server) httpGet(url string) (string, error) {
 	return string(b), nil
 }
 
-func (s *Server) httpGetJson(url string) (map[string]interface{}, error) {
+func (s *Server) httpGetJson(url string) (*JsonResponse, error) {
 	res, e := http.Get(s.handleUrl(url))
 	if e != nil {
 		return nil, e
@@ -45,15 +52,54 @@ func (s *Server) httpGetJson(url string) (map[string]interface{}, error) {
 		return nil, e
 	}
 
-	if res.StatusCode != http.StatusOK {
-		return nil, errors.New(strconv.Itoa(res.StatusCode) + ":" + string(b))
+	rp := &JsonResponse{StatusCode: res.StatusCode}
+	if res.StatusCode == http.StatusOK {
+		v := make(map[string]interface{})
+		e = json.Unmarshal(b, &v)
+		if e != nil {
+			return nil, e
+		}
+		rp.Data = v
+	} else {
+		rp.Error = string(b)
 	}
 
-	v := make(map[string]interface{})
-	e = json.Unmarshal(b, &v)
+	return rp, nil
+}
+
+func (s *Server) httpPostJson(url string, body interface{}) (*JsonResponse, error) {
+	url = s.handleUrl(url)
+	var reader *bytes.Reader
+	if body != nil {
+		b, e := json.Marshal(body)
+		if e != nil {
+			return nil, e
+		}
+		reader = bytes.NewReader(b)
+	}
+
+	res, e := http.Post(url, "application/json", reader)
+	if e != nil {
+		return nil, e
+	}
+	defer res.Body.Close()
+
+	b, e := io.ReadAll(res.Body)
 	if e != nil {
 		return nil, e
 	}
 
-	return v, nil
+	rp := &JsonResponse{StatusCode: res.StatusCode}
+	if res.StatusCode == http.StatusOK {
+		v := make(map[string]interface{})
+		e = json.Unmarshal(b, &v)
+		if e != nil {
+			return nil, e
+		}
+		rp.Data = v
+	} else {
+		rp.Error = string(b)
+	}
+
+	return rp, nil
 }

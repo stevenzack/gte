@@ -3,6 +3,7 @@ package util
 import (
 	"errors"
 	"reflect"
+	"strconv"
 )
 
 //ReplaceFieldIND replace field if not default value
@@ -33,3 +34,24 @@ func ReplaceFieldIND(dst, replacement interface{}) error {
 	}
 	return nil
 }
+
+func MapOf(kvs ...interface{}) (map[string]interface{}, error) {
+	m := make(map[string]interface{})
+	if len(kvs) == 0 {
+		return m, nil
+	}
+	for i := 0; i < len(kvs); i++ {
+		key, ok := kvs[i].(string)
+		if !ok {
+			return nil, errors.New("mapOf() failed: key[" + strconv.Itoa(i) + "] is not a string type")
+		}
+		if i+1 >= len(kvs) {
+			return nil, errors.New("mapOf() failed: key[" + strconv.Itoa(i) + "] has no value in arguments")
+		}
+		value := kvs[i+1]
+		m[key] = value
+		i++
+	}
+	return m, nil
+}
+

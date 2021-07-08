@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"html/template"
@@ -27,8 +28,10 @@ func NewServer(cfg config.Config) (*Server, error) {
 	}
 	//funcs
 	s.funcs = template.FuncMap{
-		"httpGet":     s.httpGet,
-		"httpGetJson": s.httpGetJson,
+		"httpGet":      s.httpGet,
+		"httpGetJson":  s.httpGetJson,
+		"mapOf":        util.MapOf,
+		"httpPostJson": s.httpPostJson,
 	}
 	//route duplication check
 	checked := map[string]string{}
@@ -98,12 +101,14 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	e = t.ExecuteTemplate(w, route.To, NewContext(s.cfg, route, w, r))
+	out := new(bytes.Buffer)
+	e = t.ExecuteTemplate(out, route.To, NewContext(s.cfg, route, w, r))
 	if e != nil {
 		log.Println(e)
 		http.Error(w, e.Error(), http.StatusInternalServerError)
 		return
 	}
+	w.Write(out.Bytes())
 }
 
 func (s *Server) ListenAndServe() error {

@@ -68,5 +68,4 @@ func (c *Context) GetStr(key string) (string, error) {
 		return "", errors.New("translation for key '" + key + "' not found in language resource file '" + lang + ".yaml'")
 	}
 	return v, nil
-
 }
