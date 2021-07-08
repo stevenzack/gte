@@ -21,15 +21,17 @@ import (
 )
 
 type Server struct {
-	HTTPServer  *http.Server
-	cfg         config.Config
-	prehandlers []func(w http.ResponseWriter, r *http.Request) bool
-	funcs       template.FuncMap
+	HTTPServer   *http.Server
+	cfg          config.Config
+	prehandlers  []func(w http.ResponseWriter, r *http.Request) bool
+	funcs        template.FuncMap
+	isProduction bool //is in production mode
 }
 
-func NewServer(cfg config.Config) (*Server, error) {
+func NewServer(cfg config.Config, isProduction bool) (*Server, error) {
 	s := &Server{
-		cfg: cfg,
+		cfg:          cfg,
+		isProduction: isProduction,
 	}
 	//funcs
 	s.funcs = template.FuncMap{
@@ -128,6 +130,11 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	out := new(bytes.Buffer)
 	e = t.ExecuteTemplate(out, route.To, NewContext(s.cfg, route, w, r))
 	if e != nil {
+		if strings.Contains(e.Error(), "is undefined") {
+			s.NotFound(w, r)
+			return
+		}
+
 		log.Println(e)
 		http.Error(w, e.Error(), http.StatusInternalServerError)
 		return

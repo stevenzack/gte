@@ -34,7 +34,7 @@ func run(env, dir string, port int) error {
 		return e
 	}
 
-	server, e := server.NewServer(cfg)
+	server, e := server.NewServer(cfg, false)
 	if e != nil {
 		log.Println(e)
 		return e
