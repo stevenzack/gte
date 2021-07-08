@@ -15,11 +15,11 @@ import (
 )
 
 func ApiCommand(c *cli.Context) error {
-	return serve(c.String("dir"), c.Int("p"))
+	return serve(c.Args().First(), c.String("dir"), c.Int("p"))
 }
 
-func serve(dir string, port int) error {
-	cfg, e := config.LoadConfig(dir, port)
+func serve(env, dir string, port int) error {
+	cfg, e := config.LoadConfig(env, dir, port)
 	if e != nil {
 		log.Println(e)
 		return e
@@ -47,7 +47,7 @@ func serve(dir string, port int) error {
 	e = server.ListenAndServe()
 	if e != nil {
 		if strings.Contains(e.Error(), "bind:") {
-			return serve(dir, port+1)
+			return serve(env, dir, port+1)
 		}
 		log.Println(e)
 		return e

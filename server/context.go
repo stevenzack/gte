@@ -7,7 +7,7 @@ import (
 )
 
 type Context struct {
-	cfg      config.Config
+	Config   config.Config
 	route    config.Route
 	Request  *Request
 	Response *Response
@@ -15,8 +15,8 @@ type Context struct {
 
 func NewContext(cfg config.Config, route config.Route, w http.ResponseWriter, r *http.Request) *Context {
 	ctx := &Context{
-		cfg:   cfg,
-		route: route,
+		Config: cfg,
+		route:  route,
 	}
 	ctx.Request = NewRequest(ctx, r)
 	ctx.Response = NewResponse(ctx, w)
