@@ -49,8 +49,14 @@ func (c *Context) GetStr(key string) (string, error) {
 		base, _ := tag.Base()
 		m, ok = c.Config.Strs[base.String()]
 		if !ok {
+
+			//return key as value when request of default language comes
+			if (lang == c.Config.Lang.Default || base.String() == c.Config.Lang.Default) && c.Config.Lang.KeyAsValue {
+				return key, nil
+			}
+
 			log.Println("Unsupported language '" + tag.String() + "', using default '" + c.Config.Lang.Default + "'")
-			m = c.Config.Strs[c.Config.Lang.Default]
+			m, ok = c.Config.Strs[c.Config.Lang.Default]
 			lang = c.Config.Lang.Default
 		}
 	}

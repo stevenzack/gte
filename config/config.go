@@ -24,8 +24,9 @@ type Config struct {
 	ApiServer string            `json:"apiServer"` //API server, e.g. "http://localhost:12300"
 	Envs      map[string]Config `json:"envs"`      //customized environments
 	Lang      struct {
-		Dir     string `json:"dir"`     //language resources location
-		Default string `json:"default"` //default language, e.g. 'zh-CN'
+		Dir        string `json:"dir"`        //language resources location
+		Default    string `json:"default"`    //default language, e.g. 'zh-CN'
+		KeyAsValue bool   `json:"keyAsValue"` //return key as value when request of default language comes
 	} `json:"lang"` //language setup
 
 	Env               string                       `json:"-"`
@@ -126,7 +127,7 @@ func LoadConfig(env, root string, port int) (Config, error) {
 			v.Strs[lang] = m
 		}
 
-		if _, ok := v.Strs[v.Lang.Default]; !ok {
+		if _, ok := v.Strs[v.Lang.Default]; !v.Lang.KeyAsValue && !ok {
 			return v, errors.New("The default language resource file '" + v.Lang.Default + ".yaml' not found")
 		}
 	}
