@@ -52,9 +52,9 @@ func main() {
 			Usage: "Build HTML/CSS/JS file for production, including minifing, gzipping",
 			Flags: []cli.Flag{
 				cli.StringFlag{
-					Name:  "dir",
-					Usage: "Project root location",
-					Value: wd,
+					Name:  "o",
+					Usage: "Target build output location",
+					Value: build.DEFAULT_DESTINATION,
 				},
 			},
 			Action: build.ApiCommand,

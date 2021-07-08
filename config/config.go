@@ -18,7 +18,6 @@ import (
 type Config struct {
 	Host      string            `json:"host"`
 	Port      int               `json:"port"`
-	Root      string            `json:"root"` //root directory of your project
 	Routes    []Route           `json:"routes"`
 	BlackList []string          `json:"blackList"`
 	ApiServer string            `json:"apiServer"` //API server, e.g. "http://localhost:12300"
@@ -29,6 +28,7 @@ type Config struct {
 		KeyAsValue bool   `json:"keyAsValue"` //return key as value when request of default language comes
 	} `json:"lang"` //language setup
 
+	Root              string                       `json:"-"` //root directory of your project
 	Env               string                       `json:"-"`
 	InternalBlackList []string                     `json:"-"`
 	Strs              map[string]map[string]string `json:"-"`
@@ -85,7 +85,7 @@ func LoadConfig(env, root string, port int) (Config, error) {
 		if v.Lang.Default == "" {
 			return v, errors.New("'lang.dir' configure is set, but default language is not set. e.g. 'zh-HK'")
 		}
-		langDir := filepath.Join(root, v.Lang.Dir)
+		langDir := filepath.Join(v.Root, v.Lang.Dir)
 		if _, e := os.Stat(langDir); os.IsNotExist(e) {
 			return v, errors.New("The language directory '" + langDir + "' doesn't exist")
 		}

@@ -6,7 +6,7 @@ Golang Template Engine. Build websites like JSP
 - [x]env
 - [x]lang
 - build
-    - minify
-    - gzip
-    - webp
+    - [x]minify
+    - [x]gzip
+    - [x]webp
     

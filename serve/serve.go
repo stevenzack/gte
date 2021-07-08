@@ -19,6 +19,16 @@ func ApiCommand(c *cli.Context) error {
 }
 
 func serve(env, dir string, port int) error {
+	//validate
+	info, e := os.Stat(dir)
+	if e != nil {
+		log.Println(e)
+		return e
+	}
+	if !info.IsDir() {
+		return errors.New("'" + dir + "' is not a dir")
+	}
+
 	cfg, e := config.LoadConfig(env, dir, port)
 	if e != nil {
 		log.Println(e)
@@ -31,16 +41,6 @@ func serve(env, dir string, port int) error {
 		return e
 	}
 	server.AddPrehandler(printRequest)
-
-	//validate
-	info, e := os.Stat(dir)
-	if e != nil {
-		log.Println(e)
-		return e
-	}
-	if !info.IsDir() {
-		return errors.New("'" + dir + "' is not a dir")
-	}
 
 	fmt.Println("Running server on " + server.HTTPServer.Addr)
 	openurl.Open("http://" + server.HTTPServer.Addr)
