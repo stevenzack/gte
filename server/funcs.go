@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"html/template"
 	"io"
 	"net/http"
 	"strconv"
@@ -42,7 +44,9 @@ func (s *Server) httpGet(url string) (string, error) {
 }
 
 func (s *Server) httpGetJson(url string) (*JsonResponse, error) {
-	res, e := http.Get(s.handleUrl(url))
+	url = s.handleUrl(url)
+	fmt.Println("GET\t", url)
+	res, e := http.Get(url)
 	if e != nil {
 		return nil, e
 	}
@@ -69,6 +73,7 @@ func (s *Server) httpGetJson(url string) (*JsonResponse, error) {
 
 func (s *Server) httpPostJson(url string, body interface{}) (*JsonResponse, error) {
 	url = s.handleUrl(url)
+	fmt.Println("POST\t", url)
 	var reader *bytes.Reader
 	if body != nil {
 		b, e := json.Marshal(body)
@@ -102,4 +107,8 @@ func (s *Server) httpPostJson(url string, body interface{}) (*JsonResponse, erro
 	}
 
 	return rp, nil
+}
+
+func unescape(s string) template.HTML {
+	return template.HTML(s)
 }

@@ -32,6 +32,7 @@ func NewServer(cfg config.Config) (*Server, error) {
 		"httpGetJson":  s.httpGetJson,
 		"mapOf":        util.MapOf,
 		"httpPostJson": s.httpPostJson,
+		"unescape":     unescape,
 	}
 	//route duplication check
 	checked := map[string]string{}
