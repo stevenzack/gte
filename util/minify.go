@@ -15,7 +15,7 @@ import (
 
 func ShouldGZip(ext string) bool {
 	switch ext {
-	case ".js", ".css", ".json", ".txt":
+	case ".js", ".css", ".json", ".txt", ".map", ".ttf":
 		return true
 	default:
 		return false
