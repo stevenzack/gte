@@ -8,14 +8,13 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/tdewolff/minify/v2/minify"
 )
 
 func ShouldGZip(name string) bool {
-	if name == "gte.config.json" || strings.HasSuffix(name, ".min.js") {
+	if name == "gte.config.json" {
 		return false
 	}
 	switch filepath.Ext(name) {

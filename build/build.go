@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -69,25 +68,34 @@ func build(env, out string) error {
 		ext := filepath.Ext(info.Name())
 		switch ext {
 		case ".js":
-			e := util.Obfuscate(path, dst)
-			if e != nil {
-				log.Println(e)
-				return e
+			if strings.HasSuffix(info.Name(), ".min.js") {
+				e := util.CopyFile(path, dst)
+				if e != nil {
+					log.Println(e)
+					return e
+				}
+			} else {
+				e := util.Obfuscate(path, dst)
+				if e != nil {
+					log.Println(e)
+					return e
+				}
 			}
-
 		case ".css":
+			if strings.HasPrefix(info.Name(), ".min.css") {
+				e := util.CopyFile(path, dst)
+				if e != nil {
+					log.Println(e)
+					return e
+				}
+			}
 			e := util.MinifyCss(path, dst)
 			if e != nil {
 				log.Println(e)
 				return e
 			}
 		default:
-			b, e := ioutil.ReadFile(path)
-			if e != nil {
-				log.Println(e)
-				return e
-			}
-			e = ioutil.WriteFile(dst, b, 0644)
+			e := util.CopyFile(path, dst)
 			if e != nil {
 				log.Println(e)
 				return e
