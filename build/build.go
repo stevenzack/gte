@@ -82,7 +82,7 @@ func build(env, out string) error {
 				}
 			}
 		case ".css":
-			if strings.HasPrefix(info.Name(), ".min.css") {
+			if strings.HasSuffix(info.Name(), ".min.css") {
 				e := util.CopyFile(path, dst)
 				if e != nil {
 					log.Println(e)
