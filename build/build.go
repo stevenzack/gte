@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/StevenZack/gte/config"
 	"github.com/StevenZack/gte/util"
 	"github.com/StevenZack/tools/strToolkit"
 	"github.com/urfave/cli"
@@ -96,7 +97,7 @@ func build(env, out string) error {
 
 		var tail string
 		//gzip
-		if util.ShouldGZip(ext) {
+		if util.ShouldGZip(ext) && info.Name() != config.CONFIG_FILE_NAME {
 			e = util.Gzip(path, dst+".gzip")
 			if e != nil {
 				log.Println(e)
