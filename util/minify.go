@@ -5,6 +5,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -67,7 +68,7 @@ func Gzip(file, out string) error {
 	defer fi.Close()
 	writer := gzip.NewWriter(fo)
 	defer writer.Close()
-	writer.Name = filepath.Base(out)
+	writer.Name = url.PathEscape(filepath.Base(out))
 	writer.Comment = "Gzip file of " + writer.Name
 	writer.ModTime = time.Now()
 	_, e = io.Copy(writer, fi)
