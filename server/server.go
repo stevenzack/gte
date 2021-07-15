@@ -40,6 +40,8 @@ func NewServer(cfg config.Config, isProduction bool) (*Server, error) {
 		"mapOf":        util.MapOf,
 		"httpPostJson": s.httpPostJson,
 		"unescape":     unescape,
+		"startsWith":   strings.HasPrefix,
+		"endsWith":     strings.HasSuffix,
 	}
 	//route duplication check
 	checked := map[string]string{}

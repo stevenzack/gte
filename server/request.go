@@ -3,14 +3,14 @@ package server
 import "net/http"
 
 type Request struct {
-	ctx *Context
 	*http.Request
+	ctx *Context
 }
 
 func NewRequest(ctx *Context, r *http.Request) *Request {
 	return &Request{
-		ctx:     ctx,
 		Request: r,
+		ctx:     ctx,
 	}
 }
 
