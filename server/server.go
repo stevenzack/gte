@@ -10,6 +10,7 @@ import (
 	"log"
 	"mime"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -95,6 +96,11 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ext := filepath.Ext(route.To)
 	switch ext {
 	case ".html":
+		w.Header().Set("Content-Type", "text/html")
+
+		if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+			w.Header().Set("Content-Encoding", "gzip")
+		}
 	default:
 		path := filepath.Join(s.cfg.Root, route.To)
 		if util.ShouldCWebp(ext) && strings.Contains(r.Header.Get("Accept"), "webp") {
@@ -125,6 +131,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if t == nil {
+		log.Println("t == nil")
 		s.NotFound(w, r)
 		return
 	}
@@ -133,6 +140,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	e = t.ExecuteTemplate(out, route.To, NewContext(s.cfg, route, w, r))
 	if e != nil {
 		if strings.Contains(e.Error(), "is undefined") {
+			log.Println(e)
 			s.NotFound(w, r)
 			return
 		}
@@ -143,11 +151,16 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//gzip
+
 	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
-		w.Header().Set("Content-Encoding", "gzip")
 		rw := gzip.NewWriter(w)
-		rw.Name = filepath.Base(route.To)
 		defer rw.Close()
+		rw.Name, e = url.PathUnescape(filepath.Base(route.To))
+		if e != nil {
+			log.Println(e)
+			http.Error(w, e.Error(), http.StatusInternalServerError)
+			return
+		}
 		_, e = io.Copy(rw, out)
 		if e != nil {
 			log.Println(e)

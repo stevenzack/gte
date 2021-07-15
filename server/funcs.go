@@ -45,7 +45,6 @@ func (s *Server) httpGet(url string) (string, error) {
 
 func (s *Server) httpGetJson(url string) (*JsonResponse, error) {
 	url = s.handleUrl(url)
-	fmt.Println("GET\t", url)
 	res, e := http.Get(url)
 	if e != nil {
 		return nil, e
@@ -55,6 +54,7 @@ func (s *Server) httpGetJson(url string) (*JsonResponse, error) {
 	if e != nil {
 		return nil, e
 	}
+	fmt.Println("GET\t", res.StatusCode, "\t", url)
 
 	rp := &JsonResponse{StatusCode: res.StatusCode}
 	if res.StatusCode == http.StatusOK {
@@ -66,6 +66,12 @@ func (s *Server) httpGetJson(url string) (*JsonResponse, error) {
 		rp.Data = v
 	} else {
 		rp.Error = string(b)
+		if strings.HasPrefix(rp.Error, "{") {
+			v := make(map[string]interface{})
+			if e = json.Unmarshal(b, &v); e == nil {
+				rp.Data = v
+			}
+		}
 	}
 
 	return rp, nil
@@ -73,7 +79,6 @@ func (s *Server) httpGetJson(url string) (*JsonResponse, error) {
 
 func (s *Server) httpPostJson(url string, body interface{}) (*JsonResponse, error) {
 	url = s.handleUrl(url)
-	fmt.Println("POST\t", url)
 	var reader *bytes.Reader
 	if body != nil {
 		b, e := json.Marshal(body)
@@ -89,6 +94,7 @@ func (s *Server) httpPostJson(url string, body interface{}) (*JsonResponse, erro
 	}
 	defer res.Body.Close()
 
+	fmt.Println("POST\t", res.StatusCode, "\t", url)
 	b, e := io.ReadAll(res.Body)
 	if e != nil {
 		return nil, e
@@ -104,6 +110,12 @@ func (s *Server) httpPostJson(url string, body interface{}) (*JsonResponse, erro
 		rp.Data = v
 	} else {
 		rp.Error = string(b)
+		if strings.HasPrefix(rp.Error, "{") {
+			v := make(map[string]interface{})
+			if e = json.Unmarshal(b, &v); e == nil {
+				rp.Data = v
+			}
+		}
 	}
 
 	return rp, nil
