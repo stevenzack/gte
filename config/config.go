@@ -113,6 +113,7 @@ func LoadConfig(env, root string, port int) (Config, error) {
 			content := string(b)
 			if strings.Contains(content, "：") {
 				content = strings.ReplaceAll(content, "：", ": ")
+				content = strings.ReplaceAll(content, "＃", "#")
 				e = ioutil.WriteFile(filepath, []byte(content), 0644)
 				if e != nil {
 					return v, e

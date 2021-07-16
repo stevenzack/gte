@@ -84,6 +84,14 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if route.To == "/" {
 		route.To = "/index.html"
 	}
+
+	for _, cfgRoute := range s.cfg.Routes {
+		if util.MatchRoute(cfgRoute.Path, r.URL.Path) {
+			route.Path = cfgRoute.Path
+			route.To = cfgRoute.To
+		}
+	}
+
 	//lang
 	ext := filepath.Ext(route.To)
 	prefix := strings.TrimSuffix(route.To, ext)
@@ -91,13 +99,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		route.To = prefix + "_" + util.GetLangShort(r) + ext
 	} else if _, e := os.Stat(filepath.Join(s.cfg.Root, prefix+"_"+util.GetLang(r)+ext)); e == nil {
 		route.To = prefix + "_" + util.GetLang(r) + ext
-	}
-
-	for _, cfgRoute := range s.cfg.Routes {
-		if util.MatchRoute(cfgRoute.Path, r.URL.Path) {
-			route.Path = cfgRoute.Path
-			route.To = cfgRoute.To
-		}
 	}
 
 	//serve file

@@ -2,7 +2,6 @@ package server
 
 import (
 	"errors"
-	"log"
 	"net/http"
 
 	"github.com/StevenZack/gte/config"
@@ -55,7 +54,6 @@ func (c *Context) GetStr(key string) (string, error) {
 				return key, nil
 			}
 
-			log.Println("Unsupported language '" + tag.String() + "', using default '" + c.Config.Lang.Default + "'")
 			m, ok = c.Config.Strs[c.Config.Lang.Default]
 			lang = c.Config.Lang.Default
 		}
