@@ -69,3 +69,17 @@ func (c *Context) GetStr(key string) (string, error) {
 	}
 	return v, nil
 }
+
+func (c *Context) GetLang() string {
+	accept := c.Request.Header.Get("Accept-Language")
+	accept = strToolkit.SubBefore(accept, ";", accept)
+	accept = strToolkit.SubBefore(accept, ",", accept)
+	return accept
+}
+
+func (c *Context) GetLangShort() string {
+	lang := c.GetLang()
+	lang = strToolkit.SubBefore(lang, "-", lang)
+	lang = strToolkit.SubBefore(lang, "_", lang)
+	return lang
+}
