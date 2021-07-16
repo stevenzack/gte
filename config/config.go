@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -12,7 +13,6 @@ import (
 	"github.com/StevenZack/gte/util"
 	"github.com/StevenZack/tools/strToolkit"
 	"golang.org/x/text/language"
-	"gopkg.in/yaml.v2"
 )
 
 type Config struct {
@@ -60,11 +60,13 @@ func LoadConfig(env, root string, port int) (Config, error) {
 		if os.IsNotExist(e) {
 			return v, nil
 		}
+		log.Println(e)
 		return v, e
 	}
 
 	e = json.Unmarshal(b, &v)
 	if e != nil {
+		log.Println(e)
 		return v, e
 	}
 
@@ -92,44 +94,31 @@ func LoadConfig(env, root string, port int) (Config, error) {
 		v.Strs = make(map[string]map[string]string)
 		fs, e := ioutil.ReadDir(langDir)
 		if e != nil {
+			log.Println(e)
 			return v, e
 		}
 		for _, f := range fs {
-			if !strings.HasSuffix(f.Name(), ".yaml") {
+			if !strings.HasSuffix(f.Name(), util.LANG_FILE_EXT) {
 				continue
 			}
-			lang := strToolkit.TrimEnd(f.Name(), ".yaml")
+			lang := strToolkit.TrimEnd(f.Name(), util.LANG_FILE_EXT)
 			_, e := language.Parse(lang)
 			if e != nil {
-				return v, errors.New("Invalid language resource name '" + f.Name() + "', e.g. 'zh-HK.yaml' .https://www.unicode.org/reports/tr35/#Unicode_Language_and_Locale_Identifiers")
+				return v, errors.New("Invalid language resource name '" + f.Name() + "', e.g. 'zh-HK'" + util.LANG_FILE_EXT + " .https://www.unicode.org/reports/tr35/#Unicode_Language_and_Locale_Identifiers")
 			}
 
 			//load
 			filepath := filepath.Join(langDir, f.Name())
-			b, e := ioutil.ReadFile(filepath)
+			m, e := util.LoadJsonLangFile(filepath)
 			if e != nil {
-				return v, e
-			}
-			content := string(b)
-			if strings.Contains(content, "：") {
-				content = strings.ReplaceAll(content, "：", ": ")
-				content = strings.ReplaceAll(content, "＃", "#")
-				e = ioutil.WriteFile(filepath, []byte(content), 0644)
-				if e != nil {
-					return v, e
-				}
-			}
-
-			m := make(map[string]string)
-			e = yaml.UnmarshalStrict([]byte(content), &m)
-			if e != nil {
+				log.Println(e)
 				return v, fmt.Errorf("Reading language resource file '"+f.Name()+"' failed: %w", e)
 			}
 			v.Strs[lang] = m
 		}
 
 		if _, ok := v.Strs[v.Lang.Default]; !v.Lang.KeyAsValue && !ok {
-			return v, errors.New("The default language resource file '" + v.Lang.Default + ".yaml' not found")
+			return v, errors.New("The default language resource file '" + v.Lang.Default + ".json' not found")
 		}
 	}
 	return v, nil
