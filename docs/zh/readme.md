@@ -1,5 +1,7 @@
 # GTE - Golang模版引擎
 
+![logo](https://repository-images.githubusercontent.com/383689103/64c8877a-8516-4f53-8851-abe89cc2a7be)
+
 用类似JSP的方式编写原生HTML/JS/CSS网站
 
 我们支持对原生HTML网站的以下特性：
