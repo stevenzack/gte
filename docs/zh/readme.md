@@ -9,12 +9,12 @@
 例如，我们在项目目录下新建一个`header.html`文件，和一个`footer.html`文件:
 
 ```html
-<!-- header -->
+<!-- header.html -->
 <header>Header</header>
 ```
 
 ```html
-<!-- footer -->
+<!-- footer.html -->
 <footer>Footer</footer>
 ```
 
