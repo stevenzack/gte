@@ -22,11 +22,12 @@ import (
 )
 
 type Server struct {
-	HTTPServer   *http.Server
-	cfg          config.Config
-	prehandlers  []func(w http.ResponseWriter, r *http.Request) bool
-	funcs        template.FuncMap
-	isProduction bool //is in production mode
+	HTTPServer           *http.Server
+	cfg                  config.Config
+	prehandlers          []func(w http.ResponseWriter, r *http.Request) bool
+	funcs                template.FuncMap
+	isProduction         bool //is in production mode
+	precompiledTemplates *template.Template
 }
 
 func NewServer(cfg config.Config, isProduction bool) (*Server, error) {
@@ -45,17 +46,27 @@ func NewServer(cfg config.Config, isProduction bool) (*Server, error) {
 		"endsWith":     strings.HasSuffix,
 	}
 	//route duplication check
-	checked := map[string]string{}
+	routeMap := map[string]string{}
 	for _, route := range s.cfg.Routes {
 		f := util.FormatParam(route.Path)
-		exists, ok := checked[f]
+		exists, ok := routeMap[f]
 		if ok {
 			return nil, errors.New("Duplicate route path: '" + route.Path + "' with '" + exists + "'")
 		}
-		checked[f] = route.Path
+		routeMap[f] = route.Path
 	}
 
 	s.HTTPServer = &http.Server{Addr: cfg.Host + ":" + strconv.Itoa(cfg.Port), Handler: s}
+
+	// precompile in production mode
+	if isProduction {
+		var e error
+		s.precompiledTemplates, e = util.ParseTemplates(s.cfg.Root, s.funcs)
+		if e != nil {
+			log.Println(e)
+			return nil, e
+		}
+	}
 	return s, nil
 }
 
@@ -132,16 +143,23 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//parse templates
-	t, e := util.ParseTemplates(s.cfg.Root, s.funcs)
-	if e != nil {
-		log.Println(e)
-		http.Error(w, e.Error(), http.StatusInternalServerError)
-		return
-	}
-	if t == nil {
-		log.Println("t == nil")
-		s.NotFound(w, r)
-		return
+	var e error
+	var t *template.Template
+
+	if s.isProduction {
+		t = s.precompiledTemplates
+	} else {
+		t, e = util.ParseTemplates(s.cfg.Root, s.funcs)
+		if e != nil {
+			log.Println(e)
+			http.Error(w, e.Error(), http.StatusInternalServerError)
+			return
+		}
+		if t == nil {
+			log.Println("t == nil")
+			s.NotFound(w, r)
+			return
+		}
 	}
 
 	out := new(bytes.Buffer)
