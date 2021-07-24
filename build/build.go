@@ -88,11 +88,26 @@ func build(env, out string) error {
 					log.Println(e)
 					return e
 				}
+			} else {
+				e := util.MinifyCss(path, dst)
+				if e != nil {
+					log.Println(e)
+					return e
+				}
 			}
-			e := util.MinifyCss(path, dst)
-			if e != nil {
-				log.Println(e)
-				return e
+		case ".svg":
+			if strings.HasSuffix(info.Name(), ".min.svg") {
+				e := util.CopyFile(path, dst)
+				if e != nil {
+					log.Println(e)
+					return e
+				}
+			} else {
+				e := util.MinifySvg(path, dst)
+				if e != nil {
+					log.Println(e)
+					return e
+				}
 			}
 		default:
 			e := util.CopyFile(path, dst)

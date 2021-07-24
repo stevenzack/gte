@@ -19,7 +19,7 @@ func ShouldGZip(name string) bool {
 		return false
 	}
 	switch filepath.Ext(name) {
-	case ".js", ".css", ".json", ".txt", ".map", ".ttf":
+	case ".js", ".css", ".json", ".txt", ".map", ".ttf", ".svg":
 		return true
 	default:
 		return false
@@ -38,6 +38,19 @@ func ShouldCWebp(ext string) bool {
 func CWebp(file, out string) error {
 	// return ("cwebp", "-o", out, file)
 	return exec.Command("cwebp", "-o", out, file).Run()
+}
+
+func MinifySvg(file, out string) error {
+	b, e := ioutil.ReadFile(file)
+	if e != nil {
+		return e
+	}
+	result, e := minify.SVG(string(b))
+	if e != nil {
+		return e
+	}
+	e = ioutil.WriteFile(out, []byte(result), 0644)
+	return e
 }
 
 func MinifyCss(file, out string) error {

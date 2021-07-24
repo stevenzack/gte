@@ -10,7 +10,6 @@ import (
 
 	"github.com/StevenZack/gte/config"
 	"github.com/StevenZack/gte/server"
-	"github.com/StevenZack/openurl"
 	"github.com/urfave/cli"
 )
 
@@ -42,8 +41,8 @@ func serve(env, dir string, port int) error {
 	}
 	server.AddPrehandler(printRequest)
 
-	fmt.Println("Running server on " + server.HTTPServer.Addr)
-	openurl.Open("http://" + server.HTTPServer.Addr)
+	fmt.Println("Running server on http://" + server.HTTPServer.Addr)
+	// openurl.Open("http://" + server.HTTPServer.Addr)
 	e = server.ListenAndServe()
 	if e != nil {
 		if strings.Contains(e.Error(), "bind:") {
