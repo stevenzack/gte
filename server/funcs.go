@@ -3,18 +3,22 @@ package server
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"html/template"
 	"io"
 	"net/http"
-	"strconv"
 	"strings"
 )
 
 type JsonResponse struct {
 	StatusCode int
 	Data       map[string]interface{}
+	Error      string
+}
+
+type StringResponse struct {
+	StatusCode int
+	Data       string
 	Error      string
 }
 
@@ -25,22 +29,27 @@ func (s *Server) handleUrl(url string) string {
 	return s.cfg.ApiServer + url
 }
 
-func (s *Server) httpGet(url string) (string, error) {
+func (s *Server) httpGet(url string) (*StringResponse, error) {
 	res, e := http.Get(s.handleUrl(url))
 	if e != nil {
-		return "", e
+		return nil, e
 	}
 	defer res.Body.Close()
 	b, e := io.ReadAll(res.Body)
 	if e != nil {
-		return "", e
+		return nil, e
 	}
 
-	if res.StatusCode != http.StatusOK {
-		return "", errors.New(strconv.Itoa(res.StatusCode) + ":" + string(b))
+	rp := StringResponse{
+		StatusCode: res.StatusCode,
+	}
+	if res.StatusCode >= 200 && res.StatusCode < 300 {
+		rp.Data = string(b)
+	} else {
+		rp.Error = string(b)
 	}
 
-	return string(b), nil
+	return &rp, nil
 }
 
 func (s *Server) httpGetJson(url string) (*JsonResponse, error) {
