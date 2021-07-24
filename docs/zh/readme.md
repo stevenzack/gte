@@ -6,17 +6,18 @@
 
 我们支持对原生HTML网站的以下特性：
 
-- 模板语法
-    - [x][模板语法](grammar.md)
+- 语法
+    - [x][模板语法入门](grammar.md)
     - [x][导入html文件](import.md)
-    - [x]内置语言国际化
-    - [x]内部接口请求
+    - [x][请求上下文](context.md)
+    - [x][内部接口请求](api.md)
     - [-]访问数据库
 - 配置
-    - [x]自定义路由
+    - [x][自定义路由](route.md)
+    - [x][内置语言国际化](globalization.md)
 - 打包
-    - [x]支持gzip压缩支持
-    - [x]支持图片webp自动压缩
+    - [x][支持gzip压缩支持](gzip.md)
+    - [x][支持图片webp自动压缩](webp.md)
 
 # 快速认识GTE
 
@@ -34,7 +35,7 @@
 <footer>Footer</footer>
 ```
 
-然后将可以在`index.html`文件中引用上述两个组件：
+然后就可以在`index.html`文件中引用上述两个组件：
 ```html
 <!-- index.html -->
 <!DOCTYPE html>
@@ -67,3 +68,7 @@ Footer
 
 # 接下来
 
+- 语法
+    - [模板语法入门](grammar.md)
+    - [导入html文件](import.md)
+    - [请求上下文](context.md)

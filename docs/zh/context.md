@@ -114,7 +114,7 @@
 
     文件内容通过`$res.Data`来获取，这是一个JSON对象，里面包含了文章标题`$res.Data.Title`和文章内容`$res.Data.Content`。
 
-    如果响应的HTTP状态码不为200，则显示`{{else}}`后面的内容
+    如果响应的HTTP状态码不为200，则显示`else`后面的内容
 
     ---
 
