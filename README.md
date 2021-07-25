@@ -1,12 +1,6 @@
 # gte
 Golang Template Engine. Build websites like JSP
 
-# todo
-
-- [x]env
-- [x]lang
-- build
-    - [x]minify
-    - [x]gzip
-    - [x]webp
+# [Docs](docs/readme.md)
     
+# [中文文档](docs/zh/readme.md)
