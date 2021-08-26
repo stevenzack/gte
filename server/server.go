@@ -90,10 +90,10 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Path: r.URL.Path,
 		To:   r.URL.Path,
 	}
-	s.serveRoute(route, w, r)
+	s.serveRoute(route, w, r, 0)
 }
 
-func (s *Server) serveRoute(route config.Route, w http.ResponseWriter, r *http.Request) {
+func (s *Server) serveRoute(route config.Route, w http.ResponseWriter, r *http.Request, statusCode int) {
 	//route
 	if route.To == "/" {
 		route.To = "/index.html"
@@ -186,6 +186,9 @@ func (s *Server) serveRoute(route config.Route, w http.ResponseWriter, r *http.R
 
 	//gzip
 
+	if statusCode > 0 {
+		w.WriteHeader(statusCode)
+	}
 	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
 		rw := gzip.NewWriter(w)
 		defer rw.Close()
@@ -229,11 +232,10 @@ func (s *Server) AddPrehandler(fn func(w http.ResponseWriter, r *http.Request) b
 
 func (s *Server) NotFound(w http.ResponseWriter, r *http.Request) {
 	if s.cfg.NotFoundPage != "" {
-		w.WriteHeader(404)
 		s.serveRoute(config.Route{
 			Path: r.URL.Path,
 			To:   s.cfg.NotFoundPage,
-		}, w, r)
+		}, w, r, 404)
 		return
 	}
 	http.NotFound(w, r)

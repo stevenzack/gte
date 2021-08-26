@@ -17,7 +17,7 @@ func init() {
 func main() {
 	app := cli.NewApp()
 	app.Name = "Golang Template Engine"
-	app.Version = "1.1.4"
+	app.Version = "1.1.5"
 	wd, e := os.Getwd()
 	if e != nil {
 		log.Println(e)
