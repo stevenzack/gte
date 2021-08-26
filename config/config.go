@@ -16,13 +16,14 @@ import (
 )
 
 type Config struct {
-	Host      string            `json:"host"`
-	Port      int               `json:"port"`
-	Routes    []Route           `json:"routes"`
-	BlackList []string          `json:"blackList"`
-	ApiServer string            `json:"apiServer"` //API server, e.g. "http://localhost:12300"
-	Envs      map[string]Config `json:"envs"`      //customized environments
-	Lang      struct {
+	Host         string            `json:"host"`
+	Port         int               `json:"port"`
+	Routes       []Route           `json:"routes"`
+	NotFoundPage string            `json:"notFoundPage"`
+	BlackList    []string          `json:"blackList"`
+	ApiServer    string            `json:"apiServer"` //API server, e.g. "http://localhost:12300"
+	Envs         map[string]Config `json:"envs"`      //customized environments
+	Lang         struct {
 		Dir        string `json:"dir"`        //language resources location
 		Default    string `json:"default"`    //default language, e.g. 'zh-CN'
 		KeyAsValue bool   `json:"keyAsValue"` //return key as value when request of default language comes

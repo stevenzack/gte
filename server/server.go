@@ -86,12 +86,15 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-
-	//route
 	route := config.Route{
 		Path: r.URL.Path,
 		To:   r.URL.Path,
 	}
+	s.serveRoute(route, w, r)
+}
+
+func (s *Server) serveRoute(route config.Route, w http.ResponseWriter, r *http.Request) {
+	//route
 	if route.To == "/" {
 		route.To = "/index.html"
 	}
@@ -137,6 +140,11 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				http.ServeFile(w, r, path+".gzip")
 				return
 			}
+		}
+
+		if _, e := os.Stat(path); os.IsNotExist(e) {
+			s.NotFound(w, r)
+			return
 		}
 		http.ServeFile(w, r, path)
 		return
@@ -220,5 +228,12 @@ func (s *Server) AddPrehandler(fn func(w http.ResponseWriter, r *http.Request) b
 }
 
 func (s *Server) NotFound(w http.ResponseWriter, r *http.Request) {
+	if s.cfg.NotFoundPage != "" {
+		s.serveRoute(config.Route{
+			Path: r.URL.Path,
+			To:   s.cfg.NotFoundPage,
+		}, w, r)
+		return
+	}
 	http.NotFound(w, r)
 }
