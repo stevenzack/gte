@@ -229,6 +229,7 @@ func (s *Server) AddPrehandler(fn func(w http.ResponseWriter, r *http.Request) b
 
 func (s *Server) NotFound(w http.ResponseWriter, r *http.Request) {
 	if s.cfg.NotFoundPage != "" {
+		w.WriteHeader(404)
 		s.serveRoute(config.Route{
 			Path: r.URL.Path,
 			To:   s.cfg.NotFoundPage,
