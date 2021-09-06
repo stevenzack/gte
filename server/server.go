@@ -165,6 +165,10 @@ func (s *Server) serveRoute(route config.Route, w http.ResponseWriter, r *http.R
 		}
 		if t == nil {
 			log.Println("t == nil")
+			if statusCode == 404 {
+				http.NotFound(w, r)
+				return
+			}
 			s.NotFound(w, r)
 			return
 		}
