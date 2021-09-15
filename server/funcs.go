@@ -70,9 +70,10 @@ func (s *Server) httpGetJson(url string) (*JsonResponse, error) {
 		v := make(map[string]interface{})
 		e = json.Unmarshal(b, &v)
 		if e != nil {
-			return nil, e
+			rp.Error = string(e.Error())
+		} else {
+			rp.Data = v
 		}
-		rp.Data = v
 	} else {
 		rp.Error = string(b)
 		if strings.HasPrefix(rp.Error, "{") {
@@ -114,9 +115,10 @@ func (s *Server) httpPostJson(url string, body interface{}) (*JsonResponse, erro
 		v := make(map[string]interface{})
 		e = json.Unmarshal(b, &v)
 		if e != nil {
-			return nil, e
+			rp.Error = string(e.Error())
+		} else {
+			rp.Data = v
 		}
-		rp.Data = v
 	} else {
 		rp.Error = string(b)
 		if strings.HasPrefix(rp.Error, "{") {
