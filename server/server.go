@@ -123,6 +123,10 @@ func (s *Server) serveRoute(route config.Route, w http.ResponseWriter, r *http.R
 		if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
 			w.Header().Set("Content-Encoding", "gzip")
 		}
+
+		if st, e := os.Stat(filepath.Join(s.cfg.Root, route.To)); e == nil {
+			w.Header().Set("Last-Modified", st.ModTime().Format(http.TimeFormat))
+		}
 	default:
 		path := filepath.Join(s.cfg.Root, route.To)
 		if util.ShouldCWebp(ext) && strings.Contains(r.Header.Get("Accept"), "webp") {
