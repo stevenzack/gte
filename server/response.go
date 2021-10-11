@@ -18,3 +18,13 @@ func (r *Response) SetStatusCode(code int) error {
 	r.w.WriteHeader(code)
 	return nil
 }
+
+func (r *Response) Redirect(url string) error {
+	http.Redirect(r.w, r.ctx.Request.Request, url, http.StatusTemporaryRedirect)
+	return nil
+}
+
+func (r *Response) SetHeader(key, value string) error {
+	r.w.Header().Set(key, value)
+	return nil
+}
