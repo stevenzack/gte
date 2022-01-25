@@ -39,7 +39,7 @@ func run(env, dir string, port int) error {
 		log.Println(e)
 		return e
 	}
-	server.AddPrehandler(printRequest)
+	// server.AddPrehandler(printRequest)
 
 	fmt.Println("Running server on " + server.HTTPServer.Addr)
 	openurl.Open("http://" + server.HTTPServer.Addr)

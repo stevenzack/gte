@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/StevenZack/gte/build"
+	"github.com/StevenZack/gte/reload"
 	"github.com/StevenZack/gte/run"
 	"github.com/StevenZack/gte/serve"
 	"github.com/urfave/cli"
@@ -80,6 +81,17 @@ func main() {
 				},
 			},
 			Action: run.ApiCommand,
+		},
+		{
+			Name:  "reload",
+			Usage: "reload configure on server",
+			Flags: []cli.Flag{
+				cli.Int64Flag{
+					Name:  "p",
+					Usage: "port of server that you want to reload",
+				},
+			},
+			Action: reload.ApiCommand,
 		},
 	}
 

@@ -63,7 +63,9 @@ func (s *Server) httpGetJson(url string) (*JsonResponse, error) {
 	if e != nil {
 		return nil, e
 	}
-	fmt.Println("GET\t", res.StatusCode, "\t", url)
+	if !s.isRunningMode {
+		fmt.Println("GET\t", res.StatusCode, "\t", url)
+	}
 
 	rp := &JsonResponse{StatusCode: res.StatusCode}
 	if res.StatusCode == http.StatusOK {
@@ -104,7 +106,9 @@ func (s *Server) httpPostJson(url string, body interface{}) (*JsonResponse, erro
 	}
 	defer res.Body.Close()
 
-	fmt.Println("POST\t", res.StatusCode, "\t", url)
+	if !s.isRunningMode {
+		fmt.Println("POST\t", res.StatusCode, "\t", url)
+	}
 	b, e := io.ReadAll(res.Body)
 	if e != nil {
 		return nil, e

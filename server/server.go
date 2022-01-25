@@ -26,14 +26,14 @@ type Server struct {
 	cfg                  config.Config
 	prehandlers          []func(w http.ResponseWriter, r *http.Request) bool
 	funcs                template.FuncMap
-	isProduction         bool //is in production mode
+	isRunningMode        bool //is in production mode
 	precompiledTemplates *template.Template
 }
 
-func NewServer(cfg config.Config, isProduction bool) (*Server, error) {
+func NewServer(cfg config.Config, isRunningMode bool) (*Server, error) {
 	s := &Server{
-		cfg:          cfg,
-		isProduction: isProduction,
+		cfg:           cfg,
+		isRunningMode: isRunningMode,
 	}
 	//funcs
 	s.funcs = template.FuncMap{
@@ -59,7 +59,7 @@ func NewServer(cfg config.Config, isProduction bool) (*Server, error) {
 	s.HTTPServer = &http.Server{Addr: cfg.Host + ":" + strconv.Itoa(cfg.Port), Handler: s}
 
 	// precompile in production mode
-	if isProduction {
+	if isRunningMode {
 		var e error
 		s.precompiledTemplates, e = util.ParseTemplates(s.cfg.Root, s.funcs)
 		if e != nil {
@@ -71,6 +71,16 @@ func NewServer(cfg config.Config, isProduction bool) (*Server, error) {
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodOptions && r.URL.Path == "/reload" {
+		e := s.Reload()
+		if e != nil {
+			log.Println(e)
+			http.Error(w, e.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Write([]byte("OK"))
+		return
+	}
 	//prehandler
 	for _, pre := range s.prehandlers {
 		interrupt := pre(w, r)
@@ -158,7 +168,7 @@ func (s *Server) serveRoute(route config.Route, w http.ResponseWriter, r *http.R
 	var e error
 	var t *template.Template
 
-	if s.isProduction {
+	if s.isRunningMode {
 		t = s.precompiledTemplates
 	} else {
 		t, e = util.ParseTemplates(s.cfg.Root, s.funcs)
@@ -247,4 +257,25 @@ func (s *Server) NotFound(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.NotFound(w, r)
+}
+
+func (s *Server) Reload() error {
+	cfg, e := config.LoadConfig(s.cfg.Env, s.cfg.Root, s.cfg.Port)
+	if e != nil {
+		log.Println(e)
+		return e
+	}
+
+	s.cfg = cfg
+
+	if s.isRunningMode {
+		s.precompiledTemplates, e = util.ParseTemplates(s.cfg.Root, s.funcs)
+		if e != nil {
+			log.Println(e)
+			return e
+		}
+
+	}
+	log.Println("server reloaded")
+	return nil
 }
