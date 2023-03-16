@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/StevenZack/gte/build"
+	"github.com/StevenZack/gte/minimize"
 	"github.com/StevenZack/gte/reload"
 	"github.com/StevenZack/gte/run"
 	"github.com/StevenZack/gte/serve"
@@ -18,7 +19,7 @@ func init() {
 func main() {
 	app := cli.NewApp()
 	app.Name = "Golang Template Engine"
-	app.Version = "1.1.5"
+	app.Version = "1.2.0"
 	wd, e := os.Getwd()
 	if e != nil {
 		log.Println(e)
@@ -92,6 +93,11 @@ func main() {
 				},
 			},
 			Action: reload.ApiCommand,
+		},
+		{
+			Name:   "minimize",
+			Usage:  "minimize video,png,jpeg in current directory",
+			Action: minimize.ApiCommand,
 		},
 	}
 
